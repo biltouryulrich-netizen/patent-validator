@@ -190,7 +190,7 @@ document.getElementById('ideaInput').addEventListener('input', function() {
   document.getElementById('charCount').textContent = this.value.length + ' / 1000 characters';
 });
 
-// ─── FALLBACK KEYWORD ENGINE ──────────────────────────────────────────────────
+// FALLBACK KEYWORD ENGINE
 const DB = [
   {t:"Smart thermostat with learning algorithms for energy optimization",n:"US9416987B2",y:2016,a:"Google LLC",u:"https://patents.google.com/patent/US9416987B2",k:["thermostat","temperature","smart","home","learning","energy","heating","cooling","wifi","iot"]},
   {t:"Wireless smart lighting control system with occupancy sensing",n:"US10028351B2",y:2018,a:"Philips Lighting",u:"https://patents.google.com/patent/US10028351B2",k:["smart","light","lighting","wireless","sensor","home","control","led","bulb","occupancy"]},
@@ -234,7 +234,7 @@ const STOP = new Set("a an the and or but in on at to for of with by from is it 
 
 function extractKW(text) {
   const words = text.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w => w.length > 3 && !STOP.has(w));
-  return [...new Set(words)].sort((a,b) => b.length - a.length).slice(0, 7);
+  return [...new Set(words)].sort((a,b) => b.length a.length).slice(0, 7);
 }
 
 function scoreP(patent, kws) {
@@ -248,7 +248,7 @@ function scoreP(patent, kws) {
 
 function kwFindPatents(kws) {
   return DB.map(p => ({...p, score: scoreP(p, kws)}))
-    .filter(p => p.score > 0).sort((a,b) => b.score - a.score).slice(0, 3)
+    .filter(p => p.score > 0).sort((a,b) => b.score a.score).slice(0, 3)
     .map(p => ({title:p.t, number:p.n, year:p.y, assignee:p.a, url:p.u, summary:'', relevance: p.score>=6?'high':p.score>=3?'medium':'low'}));
 }
 
@@ -266,7 +266,7 @@ Rules:
 - keywords: 4-6 most technically specific terms from the description
 - confidence: Be realistic. 70-92 = appears novel; 40-69 = overlapping area; 10-39 = heavily patented space
 - patents: 0-3 entries. Use plausible but clearly example data. If the idea is very niche, return 0-1 patents. Format URLs as https://patents.google.com/patent/US12345678B2
-- suggestions must be SPECIFIC to the user's described invention — not generic advice
+- suggestions must be SPECIFIC to the user's described invention  not generic advice
 - verdictDescription must reference specific features of the idea
 - confidenceNote must explain the reasoning behind the score with domain knowledge`;
 
@@ -295,9 +295,8 @@ Rules:
   const text = data.content.map(b => b.text || '').join('');
   const clean = text.replace(/```json|```/g, '').trim();
   return JSON.parse(clean);
-}
 
-// ─── MAIN FLOW ────────────────────────────────────────────────────────────────
+// MAIN FLOW
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function validatePatent() {
@@ -348,13 +347,13 @@ async function validatePatent() {
         verdictTitle: patents.length ? 'Similar Patents Detected' : 'No Strong Conflicts Found',
         verdictDescription: patents.length
           ? `Keyword analysis found ${patents.length} potentially related patent(s). Review below and consider the suggestions to differentiate your idea.`
-          : `No closely matching patents found in our keyword database. This is a positive signal — consider a full professional search before filing.`,
+          : `No closely matching patents found in our keyword database. This is a positive signal  consider a full professional search before filing.`,
         patents,
         suggestions: getKWsuggestions(idea),
         confidenceNote: conf >= 70
-          ? '▲ High uniqueness likelihood based on keyword analysis — specific feature combination appears novel'
-          : conf >= 45 ? '~ Moderate uniqueness — some keyword overlap detected; differentiation recommended'
-          : '▼ Lower uniqueness — this technology area has significant patent coverage',
+          ? ' High uniqueness likelihood based on keyword analysis  specific feature combination appears novel'
+          : conf >= 45 ? '~ Moderate uniqueness  some keyword overlap detected; differentiation recommended'
+          : ' Lower uniqueness  this technology area has significant patent coverage',
         _mode: 'kw'
       };
     }
@@ -365,7 +364,7 @@ async function validatePatent() {
 
   btn.disabled = false;
   document.getElementById('spinner').style.display = 'none';
-  document.getElementById('btnText').textContent = '▶ Analyze Again';
+  document.getElementById('btnText').textContent = ' Analyze Again';
   document.getElementById('loadingState').style.display = 'none';
 }
 
@@ -373,12 +372,12 @@ function getKWsuggestions(text) {
   const t = text.toLowerCase();
   if (/heat|warm|coffee|temperature|mug/.test(t)) return ["Focus on a novel heat distribution mechanism (e.g., micro-zone heating) rather than general temperature regulation, which is heavily patented","Incorporate predictive AI that learns individual drinking habits to pre-heat at the exact right time","Differentiate through a novel material such as aerogel insulation or graphene heating elements"];
   if (/wireless|wifi|bluetooth|charging/.test(t)) return ["Specify a unique charging protocol or extended safe distance that existing systems don't cover","Combine wireless charging with real-time power analytics and health data in a single patent claim","Target a specific niche (medical implants, industrial tools) where this technology hasn't been patented"];
-  if (/home|lock|thermostat|light/.test(t)) return ["Combine two currently separate functions in a single sensor with no additional hub required","Add privacy-first on-device-only AI processing — all existing competitors rely on the cloud","Design for an underserved demographic (elderly, visually impaired) with a tailored interaction model"];
+  if (/home|lock|thermostat|light/.test(t)) return ["Combine two currently separate functions in a single sensor with no additional hub required","Add privacy-first on-device-only AI processing  all existing competitors rely on the cloud","Design for an underserved demographic (elderly, visually impaired) with a tailored interaction model"];
   if (/health|heart|sleep|fitness|medical/.test(t)) return ["Target a specific combined metric (stress = skin conductance + breath rate + HRV) that no wearable currently measures together","Incorporate medical-grade accuracy certification as a core design feature distinguishing from consumer trackers","Add automatic emergency detection and caregiver alerts as a novel patentable combination with the sensor method"];
-  return ["Narrow your claim to a very specific technical mechanism — specificity is the foundation of patentability","Combine your core idea with an emerging technology (generative AI, new bio-materials) that hasn't been paired with it","Target a specific professional niche or user demographic not addressed by any existing patent in this space"];
+  return ["Narrow your claim to a very specific technical mechanism  specificity is the foundation of patentability","Combine your core idea with an emerging technology (generative AI, new bio-materials) that hasn't been paired with it","Target a specific professional niche or user demographic not addressed by any existing patent in this space"];
 }
 
-// ─── RENDER ───────────────────────────────────────────────────────────────────
+// RENDER
 function renderResults(d) {
   const found = d.verdict === 'found';
   const barColor = d.confidence >= 70 ? '#4a6741' : d.confidence >= 45 ? '#c8922a' : '#b84c2a';
@@ -387,7 +386,7 @@ function renderResults(d) {
   const kwHTML = (d.keywords||[]).map(k=>`<span class="keyword-tag">${k}</span>`).join('');
 
   const patHTML = !d.patents || d.patents.length===0
-    ? `<div class="no-patents">✓ No closely matching patents found in database</div>`
+    ? `<div class="no-patents"> No closely matching patents found in database</div>`
     : `<div class="patents-section">
         <div class="section-label">Potentially Related Patents (${d.patents.length} found)</div>
         ${d.patents.map((p,i)=>`
@@ -395,10 +394,10 @@ function renderResults(d) {
             <div class="patent-num">${i+1}.</div>
             <div>
               <div class="patent-title">${p.title}</div>
-              <div class="patent-meta">${p.number} · ${p.year} · ${p.assignee}</div>
+              <div class="patent-meta">${p.number}  ${p.year}  ${p.assignee}</div>
               ${p.summary ? `<div class="patent-summary">${p.summary}</div>` : ''}
               <span class="patent-relevance ${p.relevance}">${p.relevance.toUpperCase()} RELEVANCE</span>
-              <div style="margin-top:8px"><a href="https://patents.google.com/?q=${encodeURIComponent(p.title)}&assignee=${encodeURIComponent(p.assignee||'')}" target="_blank" class="patent-link">↗ Search on Google Patents</a></div>
+              <div style="margin-top:8px"><a href="https://patents.google.com/?q=${encodeURIComponent(p.title)}&assignee=${encodeURIComponent(p.assignee||'')}" target="_blank" class="patent-link"> Search on Google Patents</a></div>
             </div>
           </div>`).join('')}
       </div>`;
@@ -409,10 +408,10 @@ function renderResults(d) {
   const el = document.getElementById('results');
   el.innerHTML = `
     <div class="result-source-banner ${isAI ? 'ai-mode' : 'kw-mode'}">
-      ${isAI ? '✦ Powered by Claude AI — deep semantic analysis' : '◈ Keyword engine — add API key for deeper AI analysis'}
+      ${isAI ? ' Powered by Claude AI  deep semantic analysis' : ' Keyword engine  add API key for deeper AI analysis'}
     </div>
     <div class="verdict-banner ${found?'found':'clear'}">
-      <div class="verdict-icon">${found?'⚠':'✓'}</div>
+      <div class="verdict-icon">${found?'':''}</div>
       <div><div class="verdict-title">${d.verdictTitle}</div><div class="verdict-desc">${d.verdictDescription}</div></div>
     </div>
     <div class="confidence-section">
@@ -447,13 +446,13 @@ function renderError(msg, wasAI) {
     friendlyMsg = 'Rate limit reached (429 Too Many Requests)';
     hint = 'You\'ve hit the API rate limit. Wait a minute and try again, or check your usage at the Anthropic console.';
   } else if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
-    friendlyMsg = 'Network error — could not reach Anthropic API';
+    friendlyMsg = 'Network error  could not reach Anthropic API';
     hint = 'Check your internet connection and try again.';
   }
 
   document.getElementById('results').innerHTML = `
     <div class="error-box">
-      <div class="error-title">⚠ Analysis Failed</div>
+      <div class="error-title"> Analysis Failed</div>
       <div class="error-msg">
         <strong>${friendlyMsg}</strong><br><br>
         ${hint || msg}<br><br>
