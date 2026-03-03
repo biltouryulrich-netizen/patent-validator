@@ -1,15 +1,11 @@
 {
   "version": 2,
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
-      ]
-    }
+  "builds": [
+    { "src": "public/index.html", "use": "@vercel/static" },
+    { "src": "api/analyze.js", "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/api/analyze", "dest": "/api/analyze.js" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/(.*)", "dest": "/public/index.html" }
   ]
 }
