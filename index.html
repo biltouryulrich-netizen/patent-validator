@@ -187,7 +187,7 @@ document.getElementById('ideaInput').addEventListener('input', function() {
   document.getElementById('charCount').textContent = this.value.length + ' / 1000 characters';
 });
 
-async function validatePatent() {
+window.validatePatent = async function validatePatent() {
   var idea = document.getElementById('ideaInput').value.trim();
   if (idea.length < 20) {
     alert('Please describe your idea in at least 20 characters.');
