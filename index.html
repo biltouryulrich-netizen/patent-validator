@@ -6,151 +6,151 @@
 <title>AI Micro-Patent Validator</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --ink: #0f0e0c; --paper: #f5f0e8; --cream: #ede7d9;
-    --gold: #c8922a; --rust: #b84c2a; --sage: #4a6741; --border: #c4b99a;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh;
-    background-image: radial-gradient(ellipse at 20% 0%, rgba(200,146,42,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(74,103,65,0.06) 0%, transparent 60%); }
-  .wrapper { max-width: 780px; margin: 0 auto; padding: 48px 24px 80px; }
-
-  /* HEADER */
-  header { text-align: center; margin-bottom: 44px; }
-  .badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); border: 1px solid var(--gold); padding: 4px 12px; margin-bottom: 18px; }
-  h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2rem,5vw,3.1rem); line-height: 1.1; margin-bottom: 12px; }
-  h1 em { font-style: italic; color: var(--gold); }
-  .subtitle { font-size: 15px; color: #6b6152; max-width: 500px; margin: 0 auto; line-height: 1.6; font-weight: 300; }
-
-  /* DIVIDER */
-  .divider { display: flex; align-items: center; gap: 16px; margin: 26px 0; }
-  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-  .divider span { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--border); letter-spacing: 0.15em; white-space: nowrap; }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  /* FORM CARD */
-  .form-card { background: white; border: 1px solid var(--border); padding: 30px; box-shadow: 4px 4px 0 var(--border), 8px 8px 0 rgba(196,185,154,0.25); margin-bottom: 28px; position: relative; }
-  .form-card::before { content: 'FORM USPTO-AI-01'; position: absolute; top: -1px; right: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.15em; background: var(--gold); color: white; padding: 3px 10px; }
-  label { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #6b6152; margin-bottom: 10px; }
-  textarea { width: 100%; padding: 14px 16px; border: 1.5px solid var(--border); background: var(--paper); font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--ink); resize: vertical; min-height: 130px; outline: none; transition: border-color 0.2s; line-height: 1.6; }
-  textarea:focus { border-color: var(--gold); }
-  textarea::placeholder { color: #b0a590; }
-  .form-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; flex-wrap: wrap; gap: 12px; }
-  .char-hint { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #b0a590; }
-  #submitBtn { background: var(--ink); color: var(--paper); border: none; padding: 13px 32px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 10px; }
-  #submitBtn:hover:not(:disabled) { background: var(--gold); }
-  #submitBtn:disabled { background: var(--border); cursor: not-allowed; }
-  .spinner { width: 14px; height: 14px; border: 2px solid rgba(245,240,232,0.3); border-top-color: var(--paper); border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* LOADING */
-  #loadingState { display: none; text-align: center; padding: 48px; background: white; border: 1px solid var(--border); margin-bottom: 28px; }
-  .loading-glyph { font-family: 'DM Serif Display', serif; font-size: 3rem; color: var(--gold); animation: pulse 1.5s ease-in-out infinite; display: block; margin-bottom: 16px; }
-  @keyframes pulse { 0%,100%{opacity:0.35}50%{opacity:1} }
-  .loading-text { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8a7f6e; letter-spacing: 0.15em; text-transform: uppercase; }
-  .loading-steps { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
-  .loading-step { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #c4b99a; letter-spacing: 0.1em; opacity: 0; transition: opacity 0.4s; }
-  .loading-step.active { color: var(--gold); opacity: 1; }
-  .loading-step.done { color: var(--sage); opacity: 1; }
-
-  /* RESULTS */
-  #results { display: none; animation: fadeUp 0.4s ease; }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
-
-  .result-source-banner { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; padding: 8px 14px; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px; }
-  .result-source-banner.ai-mode { background: rgba(74,103,65,0.08); border: 1px solid var(--sage); color: var(--sage); }
-  .result-source-banner.kw-mode { background: rgba(200,146,42,0.08); border: 1px solid var(--gold); color: var(--gold); }
-
-  .verdict-banner { padding: 22px 26px; border: 1.5px solid; display: flex; align-items: flex-start; gap: 18px; margin-bottom: 22px; }
-  .verdict-banner.clear { border-color: var(--sage); background: rgba(74,103,65,0.05); }
-  .verdict-banner.found { border-color: var(--rust); background: rgba(184,76,42,0.05); }
-  .verdict-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
-  .verdict-title { font-family: 'DM Serif Display', serif; font-size: 1.35rem; margin-bottom: 6px; }
-  .verdict-banner.clear .verdict-title { color: var(--sage); }
-  .verdict-banner.found .verdict-title { color: var(--rust); }
-  .verdict-desc { font-size: 14px; color: #5a5247; line-height: 1.55; }
-
-  .confidence-section { background: white; border: 1px solid var(--border); padding: 22px 26px; margin-bottom: 22px; }
-  .conf-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
-  .conf-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #6b6152; }
-  .conf-score { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--ink); }
-  .conf-bar-bg { height: 8px; background: var(--cream); border: 1px solid var(--border); overflow: hidden; }
-  .conf-bar-fill { height: 100%; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); width: 0%; }
-  .conf-note { margin-top: 10px; font-size: 12px; color: #8a7f6e; font-family: 'IBM Plex Mono', monospace; line-height: 1.5; }
-
-  .keywords-section { margin-bottom: 22px; }
-  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #6b6152; margin-bottom: 12px; }
-  .keyword-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-  .keyword-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 5px 12px; border: 1px solid var(--gold); color: var(--gold); background: rgba(200,146,42,0.06); }
-
-  .patents-section { background: white; border: 1px solid var(--border); padding: 26px; margin-bottom: 22px; }
-  .patent-item { padding: 18px 0; border-bottom: 1px dashed var(--border); display: grid; grid-template-columns: 32px 1fr; gap: 14px; }
-  .patent-item:last-child { border-bottom: none; padding-bottom: 0; }
-  .patent-num { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--border); line-height: 1; margin-top: 3px; }
-  .patent-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; line-height: 1.4; }
-  .patent-meta { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8a7f6e; margin-bottom: 6px; }
-  .patent-summary { font-size: 13px; color: #5a5247; line-height: 1.5; margin-bottom: 8px; }
-  .patent-relevance { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 8px; margin-bottom: 8px; }
-  .patent-relevance.high { background: rgba(184,76,42,0.1); color: var(--rust); }
-  .patent-relevance.medium { background: rgba(200,146,42,0.1); color: var(--gold); }
-  .patent-relevance.low { background: rgba(74,103,65,0.1); color: var(--sage); }
-  .patent-link { display: inline-flex; align-items: center; gap: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--gold); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
-  .patent-link:hover { border-bottom-color: var(--gold); }
-
-  .no-patents { text-align: center; padding: 26px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--sage); letter-spacing: 0.08em; border: 1.5px dashed rgba(74,103,65,0.4); background: rgba(74,103,65,0.03); margin-bottom: 22px; }
-
-  .suggestions-section { background: var(--cream); border: 1px solid var(--border); padding: 26px; position: relative; }
-  .suggestions-section::before { content: 'AI ADVISORY'; position: absolute; top: -1px; left: 18px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.15em; background: var(--ink); color: var(--paper); padding: 3px 10px; }
-  .suggestion-item { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px dashed var(--border); }
-  .suggestion-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-  .suggestion-bullet { width: 6px; height: 6px; background: var(--gold); flex-shrink: 0; margin-top: 7px; }
-  .suggestion-text { font-size: 14px; color: #3a3228; line-height: 1.6; }
-
-  .error-box { padding: 22px 26px; border: 1.5px solid var(--rust); background: rgba(184,76,42,0.04); margin-bottom: 22px; }
-  .error-title { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--rust); margin-bottom: 8px; }
-  .error-msg { font-size: 14px; color: #5a3228; line-height: 1.6; }
-  .error-msg code { font-family: 'IBM Plex Mono', monospace; background: rgba(184,76,42,0.08); padding: 2px 6px; font-size: 12px; }
-
-  .disclaimer { margin-top: 40px; padding: 16px 20px; border-left: 3px solid var(--border); font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #a09080; line-height: 1.7; }
-
-  @media(max-width:600px){
-    .form-card { padding: 20px; }
-    .form-footer { flex-direction: column; align-items: stretch; }
-    #submitBtn { width: 100%; justify-content: center; }
-  }
+:root {
+  --ink: #0f0e0c;
+  --paper: #f5f0e8;
+  --cream: #ede7d9;
+  --gold: #c8922a;
+  --rust: #b84c2a;
+  --sage: #4a6741;
+  --border: #c4b99a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(200,146,42,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(74,103,65,0.06) 0%, transparent 60%);
+}
+.wrapper { max-width: 780px; margin: 0 auto; padding: 48px 24px 80px; }
+header { text-align: center; margin-bottom: 44px; }
+.badge {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold); border: 1px solid var(--gold); padding: 4px 12px; margin-bottom: 18px;
+}
+h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2rem,5vw,3.1rem); line-height: 1.1; margin-bottom: 12px; }
+h1 em { font-style: italic; color: var(--gold); }
+.subtitle { font-size: 15px; color: #6b6152; max-width: 500px; margin: 0 auto; line-height: 1.6; font-weight: 300; }
+.divider { display: flex; align-items: center; gap: 16px; margin: 26px 0; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.divider span { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--border); letter-spacing: 0.15em; }
+.form-card {
+  background: white; border: 1px solid var(--border); padding: 30px;
+  box-shadow: 4px 4px 0 var(--border), 8px 8px 0 rgba(196,185,154,0.25);
+  margin-bottom: 28px; position: relative;
+}
+.form-card::before {
+  content: 'FORM USPTO-AI-01'; position: absolute; top: -1px; right: 20px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.15em;
+  background: var(--gold); color: white; padding: 3px 10px;
+}
+label { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #6b6152; margin-bottom: 10px; }
+textarea {
+  width: 100%; padding: 14px 16px; border: 1.5px solid var(--border);
+  background: var(--paper); font-family: 'DM Sans', sans-serif; font-size: 15px;
+  color: var(--ink); resize: vertical; min-height: 130px; outline: none;
+  transition: border-color 0.2s; line-height: 1.6;
+}
+textarea:focus { border-color: var(--gold); }
+textarea::placeholder { color: #b0a590; }
+.form-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; flex-wrap: wrap; gap: 12px; }
+.char-hint { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #b0a590; }
+#submitBtn {
+  background: var(--ink); color: var(--paper); border: none; padding: 13px 32px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.15em;
+  text-transform: uppercase; cursor: pointer; transition: background 0.2s;
+  display: flex; align-items: center; gap: 10px;
+}
+#submitBtn:hover:not(:disabled) { background: var(--gold); }
+#submitBtn:disabled { background: var(--border); cursor: not-allowed; }
+.spinner {
+  width: 14px; height: 14px; border: 2px solid rgba(245,240,232,0.3);
+  border-top-color: var(--paper); border-radius: 50%;
+  animation: spin 0.7s linear infinite; display: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loadingState {
+  display: none; text-align: center; padding: 48px;
+  background: white; border: 1px solid var(--border); margin-bottom: 28px;
+}
+.loading-glyph {
+  font-family: 'DM Serif Display', serif; font-size: 3rem; color: var(--gold);
+  animation: pulse 1.5s ease-in-out infinite; display: block; margin-bottom: 16px;
+}
+@keyframes pulse { 0%,100% { opacity: 0.35; } 50% { opacity: 1; } }
+.loading-text { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8a7f6e; letter-spacing: 0.15em; text-transform: uppercase; }
+.loading-steps { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.loading-step { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #c4b99a; letter-spacing: 0.1em; opacity: 0; transition: opacity 0.4s; }
+.loading-step.active { color: var(--gold); opacity: 1; }
+.loading-step.done { color: var(--sage); opacity: 1; }
+#results { display: none; animation: fadeUp 0.4s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.verdict-banner { padding: 22px 26px; border: 1.5px solid; display: flex; align-items: flex-start; gap: 18px; margin-bottom: 22px; }
+.verdict-banner.clear { border-color: var(--sage); background: rgba(74,103,65,0.05); }
+.verdict-banner.found { border-color: var(--rust); background: rgba(184,76,42,0.05); }
+.verdict-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+.verdict-title { font-family: 'DM Serif Display', serif; font-size: 1.35rem; margin-bottom: 6px; }
+.verdict-banner.clear .verdict-title { color: var(--sage); }
+.verdict-banner.found .verdict-title { color: var(--rust); }
+.verdict-desc { font-size: 14px; color: #5a5247; line-height: 1.55; }
+.confidence-section { background: white; border: 1px solid var(--border); padding: 22px 26px; margin-bottom: 22px; }
+.conf-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+.conf-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #6b6152; }
+.conf-score { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--ink); }
+.conf-bar-bg { height: 8px; background: var(--cream); border: 1px solid var(--border); overflow: hidden; }
+.conf-bar-fill { height: 100%; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); width: 0%; }
+.conf-note { margin-top: 10px; font-size: 12px; color: #8a7f6e; font-family: 'IBM Plex Mono', monospace; line-height: 1.5; }
+.keywords-section { margin-bottom: 22px; }
+.section-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #6b6152; margin-bottom: 12px; }
+.keyword-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.keyword-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 5px 12px; border: 1px solid var(--gold); color: var(--gold); background: rgba(200,146,42,0.06); }
+.patents-section { background: white; border: 1px solid var(--border); padding: 26px; margin-bottom: 22px; }
+.patent-item { padding: 18px 0; border-bottom: 1px dashed var(--border); display: grid; grid-template-columns: 32px 1fr; gap: 14px; }
+.patent-item:last-child { border-bottom: none; padding-bottom: 0; }
+.patent-num { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--border); line-height: 1; margin-top: 3px; }
+.patent-title-text { font-size: 14px; font-weight: 500; margin-bottom: 4px; line-height: 1.4; }
+.patent-meta { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8a7f6e; margin-bottom: 6px; }
+.patent-summary { font-size: 13px; color: #5a5247; line-height: 1.5; margin-bottom: 8px; }
+.patent-relevance { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 8px; margin-bottom: 8px; }
+.patent-relevance.high { background: rgba(184,76,42,0.1); color: var(--rust); }
+.patent-relevance.medium { background: rgba(200,146,42,0.1); color: var(--gold); }
+.patent-relevance.low { background: rgba(74,103,65,0.1); color: var(--sage); }
+.patent-link { display: inline-flex; align-items: center; gap: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--gold); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+.patent-link:hover { border-bottom-color: var(--gold); }
+.no-patents { text-align: center; padding: 26px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--sage); letter-spacing: 0.08em; border: 1.5px dashed rgba(74,103,65,0.4); background: rgba(74,103,65,0.03); margin-bottom: 22px; }
+.suggestions-section { background: var(--cream); border: 1px solid var(--border); padding: 26px; position: relative; }
+.suggestions-section::before { content: 'AI ADVISORY'; position: absolute; top: -1px; left: 18px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.15em; background: var(--ink); color: var(--paper); padding: 3px 10px; }
+.suggestion-item { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px dashed var(--border); }
+.suggestion-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.suggestion-bullet { width: 6px; height: 6px; background: var(--gold); flex-shrink: 0; margin-top: 7px; }
+.suggestion-text { font-size: 14px; color: #3a3228; line-height: 1.6; }
+.error-box { padding: 22px 26px; border: 1.5px solid var(--rust); background: rgba(184,76,42,0.04); margin-bottom: 22px; }
+.error-title { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--rust); margin-bottom: 8px; }
+.error-msg { font-size: 14px; color: #5a3228; line-height: 1.6; }
+.disclaimer { margin-top: 40px; padding: 16px 20px; border-left: 3px solid var(--border); font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #a09080; line-height: 1.7; }
+@media (max-width: 600px) {
+  .form-card { padding: 20px; }
+  .form-footer { flex-direction: column; align-items: stretch; }
+  #submitBtn { width: 100%; justify-content: center; }
+}
 </style>
 </head>
 <body>
 <div class="wrapper">
 
   <header>
-    <div class="badge">⚖ Patent Intelligence Tool</div>
+    <div class="badge">Patent Intelligence Tool</div>
     <h1>AI Micro-Patent<br><em>Validator</em></h1>
     <p class="subtitle">Describe your invention idea and our AI will search for similar patents and estimate how unique your concept is.</p>
   </header>
 
   <div class="divider"><span>File Your Disclosure</span></div>
 
-  <!-- IDEA FORM -->
   <div class="form-card">
     <label for="ideaInput">Describe your invention or product idea</label>
     <textarea id="ideaInput" placeholder="Example: A self-heating coffee mug that uses wireless charging to maintain temperature and sends alerts to your phone when the coffee is ready to drink..." maxlength="1000"></textarea>
@@ -158,277 +158,140 @@
       <span class="char-hint" id="charCount">0 / 1000 characters</span>
       <button id="submitBtn" onclick="validatePatent()">
         <span class="spinner" id="spinner"></span>
-        <span id="btnText">▶ Analyze Idea</span>
+        <span id="btnText">Analyze Idea</span>
       </button>
     </div>
   </div>
 
-  <!-- LOADING -->
   <div id="loadingState">
-    <span class="loading-glyph">⚖</span>
-    <div class="loading-text" id="loadingLabel">Searching Patent Databases</div>
+    <span class="loading-glyph">&#9878;</span>
+    <div class="loading-text">Claude AI Analyzing Your Idea</div>
     <div class="loading-steps">
-      <div class="loading-step" id="step1">→ Extracting keywords from description...</div>
-      <div class="loading-step" id="step2">→ Querying USPTO patent database...</div>
-      <div class="loading-step" id="step3">→ Querying WIPO global patents...</div>
-      <div class="loading-step" id="step4">→ Running AI similarity analysis...</div>
-      <div class="loading-step" id="step5">→ Generating uniqueness report...</div>
+      <div class="loading-step" id="step1">Extracting keywords...</div>
+      <div class="loading-step" id="step2">Querying USPTO database...</div>
+      <div class="loading-step" id="step3">Querying WIPO patents...</div>
+      <div class="loading-step" id="step4">Running AI analysis...</div>
+      <div class="loading-step" id="step5">Generating report...</div>
     </div>
   </div>
 
   <div id="results"></div>
 
   <div class="disclaimer">
-    ⚠ DISCLAIMER: This tool is for informational and educational purposes only. AI-generated results are estimates based on training data and patent database sampling — not a live legal search. This does NOT constitute legal advice. For actual patent filing, consult a registered patent attorney or search official USPTO (ppubs.uspto.gov) and WIPO (patentscope.wipo.int) tools.
+    DISCLAIMER: This tool is for informational purposes only. Results are AI-generated estimates and do not constitute legal advice. For actual patent filing, consult a registered patent attorney.
   </div>
+
 </div>
-
 <script>
-const SAVED_KEY = 'server';
-
 document.getElementById('ideaInput').addEventListener('input', function() {
   document.getElementById('charCount').textContent = this.value.length + ' / 1000 characters';
 });
 
-// FALLBACK KEYWORD ENGINE
-const DB = [
-  {t:"Smart thermostat with learning algorithms for energy optimization",n:"US9416987B2",y:2016,a:"Google LLC",u:"https://patents.google.com/patent/US9416987B2",k:["thermostat","temperature","smart","home","learning","energy","heating","cooling","wifi","iot"]},
-  {t:"Wireless smart lighting control system with occupancy sensing",n:"US10028351B2",y:2018,a:"Philips Lighting",u:"https://patents.google.com/patent/US10028351B2",k:["smart","light","lighting","wireless","sensor","home","control","led","bulb","occupancy"]},
-  {t:"IoT-based home security system with facial recognition",n:"US10380429B1",y:2019,a:"Amazon Technologies",u:"https://patents.google.com/patent/US10380429B1",k:["security","camera","home","facial","recognition","iot","smart","alert","monitor","doorbell"]},
-  {t:"Voice-controlled smart speaker with personalized audio profiles",n:"US9886953B2",y:2018,a:"Amazon Technologies",u:"https://patents.google.com/patent/US9886953B2",k:["voice","speaker","smart","audio","control","home","assistant","wifi","wireless"]},
-  {t:"Automated smart lock with biometric and remote access",n:"US10176655B2",y:2019,a:"August Home Inc",u:"https://patents.google.com/patent/US10176655B2",k:["lock","door","smart","biometric","fingerprint","remote","access","keyless","bluetooth"]},
-  {t:"Wearable heart rate and ECG monitoring band with mobile alerts",n:"US10568533B2",y:2020,a:"Apple Inc",u:"https://patents.google.com/patent/US10568533B2",k:["wearable","heart","rate","monitor","ecg","health","band","watch","fitness","mobile","alert","sensor"]},
-  {t:"Smart fitness tracker with sleep quality analysis",n:"US9569966B2",y:2017,a:"Fitbit Inc",u:"https://patents.google.com/patent/US9569966B2",k:["fitness","tracker","sleep","health","wearable","sensor","activity","steps","wrist","band"]},
-  {t:"Continuous glucose monitoring patch with wireless data transmission",n:"US10413657B2",y:2019,a:"Dexcom Inc",u:"https://patents.google.com/patent/US10413657B2",k:["glucose","monitor","diabetes","patch","wireless","sensor","health","blood","continuous","wearable"]},
-  {t:"Smart insole for gait analysis and posture correction feedback",n:"US10143405B2",y:2018,a:"Moticon GmbH",u:"https://patents.google.com/patent/US10143405B2",k:["insole","shoe","gait","posture","pressure","sensor","walking","balance","feedback","foot"]},
-  {t:"Augmented reality heads-up display glasses for navigation",n:"US9952042B2",y:2018,a:"Google LLC",u:"https://patents.google.com/patent/US9952042B2",k:["glasses","augmented","reality","display","navigation","heads","wearable","vision","ar"]},
-  {t:"Self-heating beverage container with phase-change material",n:"US8215513B2",y:2012,a:"HeatGen LLC",u:"https://patents.google.com/patent/US8215513B2",k:["mug","cup","coffee","heat","self","heating","beverage","temperature","container","warm","hot"]},
-  {t:"Smart coffee mug with temperature regulation and app connectivity",n:"US10159370B2",y:2018,a:"Ember Technologies",u:"https://patents.google.com/patent/US10159370B2",k:["mug","coffee","smart","temperature","app","heat","wireless","charging","drink","connected","warm","notify","phone","alert"]},
-  {t:"Wireless induction charging coaster for heated drinkware",n:"US10374463B2",y:2019,a:"Ember Technologies",u:"https://patents.google.com/patent/US10374463B2",k:["wireless","charging","coaster","heat","mug","induction","cup","drinkware","qi"]},
-  {t:"Smart refrigerator with inventory tracking and expiration alerts",n:"US10670316B2",y:2020,a:"Samsung Electronics",u:"https://patents.google.com/patent/US10670316B2",k:["refrigerator","fridge","smart","inventory","food","track","expiration","alert","camera","iot"]},
-  {t:"Automated meal planning system with nutritional analysis",n:"US10290217B2",y:2019,a:"Nutrino Health",u:"https://patents.google.com/patent/US10290217B2",k:["meal","plan","nutrition","food","diet","health","app","recipe","calories","automated"]},
-  {t:"Autonomous vehicle navigation system using deep learning",n:"US10328948B2",y:2019,a:"Waymo LLC",u:"https://patents.google.com/patent/US10328948B2",k:["autonomous","self","driving","car","vehicle","navigation","ai","lidar","sensor","camera"]},
-  {t:"Electric bicycle with regenerative braking and smart battery management",n:"US9636992B2",y:2017,a:"Trek Bicycle Corp",u:"https://patents.google.com/patent/US9636992B2",k:["bicycle","electric","bike","battery","motor","ebike","regenerative","brake","pedal","smart"]},
-  {t:"Foldable electric scooter with GPS tracking and app control",n:"US10486763B2",y:2019,a:"Lime Inc",u:"https://patents.google.com/patent/US10486763B2",k:["scooter","electric","foldable","gps","tracking","app","mobility","urban"]},
-  {t:"Personal drone with obstacle avoidance and follow-me tracking",n:"US10196143B2",y:2019,a:"DJI Technology",u:"https://patents.google.com/patent/US10196143B2",k:["drone","uav","obstacle","follow","tracking","camera","aerial","autonomous","flight"]},
-  {t:"Portable solar charging backpack with flexible photovoltaic panels",n:"US9537333B2",y:2017,a:"SolarCity Corp",u:"https://patents.google.com/patent/US9537333B2",k:["solar","backpack","charging","portable","panel","battery","renewable","energy","outdoor","bag"]},
-  {t:"Smart water bottle with hydration tracking and purification filter",n:"US10252852B2",y:2019,a:"Hidrate Inc",u:"https://patents.google.com/patent/US10252852B2",k:["water","bottle","hydration","smart","filter","purification","track","drink","sensor","app"]},
-  {t:"Biodegradable packaging material derived from agricultural waste",n:"US10557016B2",y:2020,a:"Ecovative Design",u:"https://patents.google.com/patent/US10557016B2",k:["biodegradable","packaging","sustainable","eco","compostable","waste","organic","material","green"]},
-  {t:"Home composting system with accelerated decomposition chamber",n:"US9527775B2",y:2016,a:"Nature Mill Inc",u:"https://patents.google.com/patent/US9527775B2",k:["compost","composting","waste","organic","food","recycle","decompose","home","eco","soil"]},
-  {t:"Ergonomic standing desk converter with automatic height adjustment",n:"US10420415B2",y:2019,a:"Flexispot Inc",u:"https://patents.google.com/patent/US10420415B2",k:["desk","standing","ergonomic","adjustable","height","office","electric","posture","motor"]},
-  {t:"Noise-cancelling earbuds with ambient sound passthrough",n:"US10750284B2",y:2020,a:"Apple Inc",u:"https://patents.google.com/patent/US10750284B2",k:["earbuds","noise","cancel","audio","wireless","bluetooth","sound","ear","headphone","anc"]},
-  {t:"Interactive educational toy robot with voice recognition for children",n:"US10183206B2",y:2019,a:"Learning Resources Inc",u:"https://patents.google.com/patent/US10183206B2",k:["robot","toy","child","education","voice","interactive","learn","kids","ai","programming"]},
-  {t:"Smart baby monitor with breathing detection and sleep tracking",n:"US10499844B2",y:2019,a:"Owlet Baby Care",u:"https://patents.google.com/patent/US10499844B2",k:["baby","monitor","breathing","sleep","infant","smart","sensor","alert","parent","oxygen"]},
-  {t:"Automated hydroponic growing system with nutrient control",n:"US10412904B2",y:2019,a:"AeroFarms LLC",u:"https://patents.google.com/patent/US10412904B2",k:["hydroponic","garden","grow","plant","indoor","nutrient","automated","water","light","soil","vertical","farm"]},
-  {t:"Smart soil sensor network for irrigation optimization",n:"US9894848B2",y:2018,a:"CropX Inc",u:"https://patents.google.com/patent/US9894848B2",k:["soil","sensor","irrigation","water","farm","plant","moisture","smart","garden","agriculture"]},
-  {t:"Exoskeleton assistive device for mobility-impaired individuals",n:"US10449105B2",y:2019,a:"Ekso Bionics",u:"https://patents.google.com/patent/US10449105B2",k:["exoskeleton","mobility","disability","walk","rehabilitation","robot","assistive","leg","wearable","medical"]},
-  {t:"Portable air quality monitor with pollution alert system",n:"US10126283B2",y:2018,a:"Awair Inc",u:"https://patents.google.com/patent/US10126283B2",k:["air","quality","pollution","monitor","sensor","portable","health","alert","co2","voc","breathe"]},
-  {t:"Automated pet feeder with portion control and remote monitoring",n:"US10143169B2",y:2018,a:"PetSafe Inc",u:"https://patents.google.com/patent/US10143169B2",k:["pet","feeder","dog","cat","automatic","food","portion","remote","app","smart","feed"]},
-  {t:"GPS pet collar with health monitoring and activity tracking",n:"US10271518B2",y:2019,a:"Whistle Labs",u:"https://patents.google.com/patent/US10271518B2",k:["pet","collar","gps","track","dog","cat","health","activity","location","smart","fitness"]},
-  {t:"Haptic feedback glove for virtual reality immersion",n:"US10345906B2",y:2019,a:"HaptX Inc",u:"https://patents.google.com/patent/US10345906B2",k:["haptic","vr","virtual","reality","glove","feedback","game","immersive","touch","controller"]},
-  {t:"Foldable smartphone display with flexible OLED panel",n:"US10637959B2",y:2020,a:"Samsung Electronics",u:"https://patents.google.com/patent/US10637959B2",k:["foldable","phone","smartphone","flexible","display","oled","screen","fold","mobile"]},
-  {t:"3D printing system for biodegradable construction materials",n:"US10596726B2",y:2020,a:"ICON Technology",u:"https://patents.google.com/patent/US10596726B2",k:["3d","print","construction","biodegradable","building","concrete","sustainable","material","additive"]},
-];
-
-const STOP = new Set("a an the and or but in on at to for of with by from is it that this which as can will would could should has have use uses using make makes help helps when how what who also into be are was were been being do does did than then their they we our your its my he she his her i if so up out about very also some this new get".split(" "));
-
-function extractKW(text) {
-  const words = text.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w => w.length > 3 && !STOP.has(w));
-  return [...new Set(words)].sort((a,b) => b.length a.length).slice(0, 7);
-}
-
-function scoreP(patent, kws) {
-  let s = 0;
-  for (const uk of kws) for (const pk of patent.k) {
-    if (pk === uk) s += 3;
-    else if (pk.includes(uk) || uk.includes(pk)) s += 1;
-  }
-  return s;
-}
-
-function kwFindPatents(kws) {
-  return DB.map(p => ({...p, score: scoreP(p, kws)}))
-    .filter(p => p.score > 0).sort((a,b) => b.score a.score).slice(0, 3)
-    .map(p => ({title:p.t, number:p.n, year:p.y, assignee:p.a, url:p.u, summary:'', relevance: p.score>=6?'high':p.score>=3?'medium':'low'}));
-}
-
-function kwCalcConf(patents) {
-  if (!patents.length) return 78 + Math.floor(Math.random()*14);
-  const top = Math.max(...patents.map(p => scoreP({k:[]},[])));
-  const firstScore = DB.map(p=>({...p,score:scoreP(p, extractKW(''))})).sort((a,b)=>b.score-a.score)[0]?.score || 0;
-  if (patents[0].relevance==='high') return 22 + Math.floor(Math.random()*16);
-  if (patents[0].relevance==='medium') return 42 + Math.floor(Math.random()*18);
-  return 60 + Math.floor(Math.random()*16);
-}
-
-
-Rules:
-- keywords: 4-6 most technically specific terms from the description
-- confidence: Be realistic. 70-92 = appears novel; 40-69 = overlapping area; 10-39 = heavily patented space
-- patents: 0-3 entries. Use plausible but clearly example data. If the idea is very niche, return 0-1 patents. Format URLs as https://patents.google.com/patent/US12345678B2
-- suggestions must be SPECIFIC to the user's described invention  not generic advice
-- verdictDescription must reference specific features of the idea
-- confidenceNote must explain the reasoning behind the score with domain knowledge`;
-
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1200,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: `Analyze this invention idea for patent conflicts and uniqueness:\n\n"${idea}"` }]
-    })
-  });
-
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    throw new Error(err?.error?.message || `API error ${resp.status}`);
-  }
-
-  const data = await resp.json();
-  const text = data.content.map(b => b.text || '').join('');
-  const clean = text.replace(/```json|```/g, '').trim();
-  return JSON.parse(clean);
-
-// MAIN FLOW
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
 async function validatePatent() {
-  const idea = document.getElementById('ideaInput').value.trim();
-  if (idea.length < 20) { alert('Please describe your idea in at least 20 characters.'); return; }
+  var idea = document.getElementById('ideaInput').value.trim();
+  if (idea.length < 20) {
+    alert('Please describe your idea in at least 20 characters.');
+    return;
+  }
 
-  const usingAI = true;
-
-  const btn = document.getElementById('submitBtn');
+  var btn = document.getElementById('submitBtn');
   btn.disabled = true;
   document.getElementById('spinner').style.display = 'block';
   document.getElementById('btnText').textContent = 'Analyzing...';
   document.getElementById('results').style.display = 'none';
   document.getElementById('loadingState').style.display = 'block';
-  document.getElementById('loadingLabel').textContent = 'Claude AI Analyzing Your Idea';
 
-  const steps = ['step1','step2','step3','step4','step5'];
-  for (let i = 0; i < steps.length; i++) {
-    await sleep(usingAI ? 700 : 520);
-    if (i > 0) document.getElementById(steps[i-1]).classList.remove('active');
-    const el = document.getElementById(steps[i]);
-    el.classList.add('active'); el.classList.add('done');
-  }
-  await sleep(300);
+  var steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
+  var si = 0;
+  var iv = setInterval(function() {
+    if (si > 0) document.getElementById(steps[si - 1]).classList.remove('active');
+    if (si < steps.length) {
+      document.getElementById(steps[si]).classList.add('active');
+      document.getElementById(steps[si]).classList.add('done');
+      si++;
+    } else {
+      clearInterval(iv);
+    }
+  }, 700);
 
   try {
-    let result;
-    if (usingAI) {
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idea })
-      });
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}));
-        throw new Error(e.error || 'Server error ' + res.status);
-      }
-      result = await res.json();
-      result._mode = 'ai';
-    } else {
-      const kws = extractKW(idea);
-      const patents = kwFindPatents(kws);
-      const conf = kwCalcConf(patents);
-      result = {
-        keywords: kws,
-        confidence: conf,
-        verdict: patents.some(p => p.relevance==='high') || patents.length >= 2 ? 'found' : 'clear',
-        verdictTitle: patents.length ? 'Similar Patents Detected' : 'No Strong Conflicts Found',
-        verdictDescription: patents.length
-          ? `Keyword analysis found ${patents.length} potentially related patent(s). Review below and consider the suggestions to differentiate your idea.`
-          : `No closely matching patents found in our keyword database. This is a positive signal  consider a full professional search before filing.`,
-        patents,
-        suggestions: getKWsuggestions(idea),
-        confidenceNote: conf >= 70
-          ? ' High uniqueness likelihood based on keyword analysis  specific feature combination appears novel'
-          : conf >= 45 ? '~ Moderate uniqueness  some keyword overlap detected; differentiation recommended'
-          : ' Lower uniqueness  this technology area has significant patent coverage',
-        _mode: 'kw'
-      };
+    var response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idea: idea })
+    });
+    clearInterval(iv);
+    if (!response.ok) {
+      var errData = await response.json().catch(function() { return {}; });
+      throw new Error(errData.error || 'Server error ' + response.status);
     }
-    renderResults(result);
-  } catch(e) {
-    renderError(e.message, usingAI);
+    var data = await response.json();
+    renderResults(data);
+  } catch (err) {
+    clearInterval(iv);
+    renderError(err.message);
   }
 
   btn.disabled = false;
   document.getElementById('spinner').style.display = 'none';
-  document.getElementById('btnText').textContent = ' Analyze Again';
+  document.getElementById('btnText').textContent = 'Analyze Again';
   document.getElementById('loadingState').style.display = 'none';
 }
 
-function getKWsuggestions(text) {
-  const t = text.toLowerCase();
-  if (/heat|warm|coffee|temperature|mug/.test(t)) return ["Focus on a novel heat distribution mechanism (e.g., micro-zone heating) rather than general temperature regulation, which is heavily patented","Incorporate predictive AI that learns individual drinking habits to pre-heat at the exact right time","Differentiate through a novel material such as aerogel insulation or graphene heating elements"];
-  if (/wireless|wifi|bluetooth|charging/.test(t)) return ["Specify a unique charging protocol or extended safe distance that existing systems don't cover","Combine wireless charging with real-time power analytics and health data in a single patent claim","Target a specific niche (medical implants, industrial tools) where this technology hasn't been patented"];
-  if (/home|lock|thermostat|light/.test(t)) return ["Combine two currently separate functions in a single sensor with no additional hub required","Add privacy-first on-device-only AI processing  all existing competitors rely on the cloud","Design for an underserved demographic (elderly, visually impaired) with a tailored interaction model"];
-  if (/health|heart|sleep|fitness|medical/.test(t)) return ["Target a specific combined metric (stress = skin conductance + breath rate + HRV) that no wearable currently measures together","Incorporate medical-grade accuracy certification as a core design feature distinguishing from consumer trackers","Add automatic emergency detection and caregiver alerts as a novel patentable combination with the sensor method"];
-  return ["Narrow your claim to a very specific technical mechanism  specificity is the foundation of patentability","Combine your core idea with an emerging technology (generative AI, new bio-materials) that hasn't been paired with it","Target a specific professional niche or user demographic not addressed by any existing patent in this space"];
-}
-
-// RENDER
 function renderResults(d) {
-  const found = d.verdict === 'found';
-  const barColor = d.confidence >= 70 ? '#4a6741' : d.confidence >= 45 ? '#c8922a' : '#b84c2a';
-  const isAI = d._mode === 'ai';
+  var found = d.verdict === 'found';
+  var barColor = d.confidence >= 70 ? '#4a6741' : d.confidence >= 45 ? '#c8922a' : '#b84c2a';
 
-  const kwHTML = (d.keywords||[]).map(k=>`<span class="keyword-tag">${k}</span>`).join('');
+  var kwHTML = '';
+  var keywords = d.keywords || [];
+  for (var i = 0; i < keywords.length; i++) {
+    kwHTML += '<span class="keyword-tag">' + escHtml(keywords[i]) + '</span>';
+  }
 
-  const patHTML = !d.patents || d.patents.length===0
-    ? `<div class="no-patents"> No closely matching patents found in database</div>`
-    : `<div class="patents-section">
-        <div class="section-label">Potentially Related Patents (${d.patents.length} found)</div>
-        ${d.patents.map((p,i)=>`
-          <div class="patent-item">
-            <div class="patent-num">${i+1}.</div>
-            <div>
-              <div class="patent-title">${p.title}</div>
-              <div class="patent-meta">${p.number}  ${p.year}  ${p.assignee}</div>
-              ${p.summary ? `<div class="patent-summary">${p.summary}</div>` : ''}
-              <span class="patent-relevance ${p.relevance}">${p.relevance.toUpperCase()} RELEVANCE</span>
-              <div style="margin-top:8px"><a href="https://patents.google.com/?q=${encodeURIComponent(p.title)}&assignee=${encodeURIComponent(p.assignee||'')}" target="_blank" class="patent-link"> Search on Google Patents</a></div>
-            </div>
-          </div>`).join('')}
-      </div>`;
+  var patHTML = '';
+  if (!d.patents || d.patents.length === 0) {
+    patHTML = '<div class="no-patents">No closely matching patents found</div>';
+  } else {
+    patHTML = '<div class="patents-section"><div class="section-label">Potentially Related Patents (' + d.patents.length + ' found)</div>';
+    for (var j = 0; j < d.patents.length; j++) {
+      var p = d.patents[j];
+      var searchUrl = 'https://patents.google.com/?q=' + encodeURIComponent(p.title) + '&assignee=' + encodeURIComponent(p.assignee || '');
+      patHTML += '<div class="patent-item">';
+      patHTML += '<div class="patent-num">' + (j + 1) + '.</div><div>';
+      patHTML += '<div class="patent-title-text">' + escHtml(p.title) + '</div>';
+      patHTML += '<div class="patent-meta">' + escHtml(p.number) + ' &middot; ' + p.year + ' &middot; ' + escHtml(p.assignee) + '</div>';
+      if (p.summary) patHTML += '<div class="patent-summary">' + escHtml(p.summary) + '</div>';
+      patHTML += '<span class="patent-relevance ' + p.relevance + '">' + p.relevance.toUpperCase() + ' RELEVANCE</span>';
+      patHTML += '<div style="margin-top:8px"><a href="' + searchUrl + '" target="_blank" class="patent-link">Search on Google Patents</a></div>';
+      patHTML += '</div></div>';
+    }
+    patHTML += '</div>';
+  }
 
-  const sugHTML = (d.suggestions||[]).slice(0,3).map(s=>`
-    <div class="suggestion-item"><div class="suggestion-bullet"></div><div class="suggestion-text">${s}</div></div>`).join('');
+  var sugHTML = '';
+  var suggestions = d.suggestions || [];
+  for (var k = 0; k < suggestions.length && k < 3; k++) {
+    sugHTML += '<div class="suggestion-item"><div class="suggestion-bullet"></div><div class="suggestion-text">' + escHtml(suggestions[k]) + '</div></div>';
+  }
 
-  const el = document.getElementById('results');
-  el.innerHTML = `
-    <div class="result-source-banner ${isAI ? 'ai-mode' : 'kw-mode'}">
-      ${isAI ? ' Powered by Claude AI  deep semantic analysis' : ' Keyword engine  add API key for deeper AI analysis'}
-    </div>
-    <div class="verdict-banner ${found?'found':'clear'}">
-      <div class="verdict-icon">${found?'':''}</div>
-      <div><div class="verdict-title">${d.verdictTitle}</div><div class="verdict-desc">${d.verdictDescription}</div></div>
-    </div>
-    <div class="confidence-section">
-      <div class="conf-header"><span class="conf-label">Uniqueness Confidence Score</span><span class="conf-score" id="confNum">0%</span></div>
-      <div class="conf-bar-bg"><div class="conf-bar-fill" id="confBar" style="background:${barColor};width:0%"></div></div>
-      <div class="conf-note">${d.confidenceNote}</div>
-    </div>
-    <div class="keywords-section"><div class="section-label">Extracted Keywords</div><div class="keyword-tags">${kwHTML}</div></div>
-    ${patHTML}
-    <div class="suggestions-section">
-      <div class="section-label" style="margin-top:8px;margin-bottom:16px">AI Suggestions to Improve Uniqueness</div>
-      ${sugHTML}
-    </div>`;
+  var html = '';
+  html += '<div class="verdict-banner ' + (found ? 'found' : 'clear') + '">';
+  html += '<div class="verdict-icon">' + (found ? '&#9888;' : '&#10003;') + '</div>';
+  html += '<div><div class="verdict-title">' + escHtml(d.verdictTitle) + '</div>';
+  html += '<div class="verdict-desc">' + escHtml(d.verdictDescription) + '</div></div></div>';
+  html += '<div class="confidence-section">';
+  html += '<div class="conf-header"><span class="conf-label">Uniqueness Confidence Score</span><span class="conf-score" id="confNum">0%</span></div>';
+  html += '<div class="conf-bar-bg"><div class="conf-bar-fill" id="confBar" style="background:' + barColor + ';width:0%"></div></div>';
+  html += '<div class="conf-note">' + escHtml(d.confidenceNote) + '</div></div>';
+  html += '<div class="keywords-section"><div class="section-label">Extracted Keywords</div><div class="keyword-tags">' + kwHTML + '</div></div>';
+  html += patHTML;
+  html += '<div class="suggestions-section"><div class="section-label" style="margin-top:8px;margin-bottom:16px">AI Suggestions to Improve Uniqueness</div>' + sugHTML + '</div>';
 
+  var el = document.getElementById('results');
+  el.innerHTML = html;
   el.style.display = 'block';
 
-  setTimeout(() => {
+  setTimeout(function() {
     document.getElementById('confBar').style.width = d.confidence + '%';
     animateNum('confNum', 0, d.confidence, 1100);
   }, 100);
@@ -436,39 +299,31 @@ function renderResults(d) {
   el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function renderError(msg, wasAI) {
-  let friendlyMsg = msg;
-  let hint = '';
-  if (msg.includes('401') || msg.includes('invalid') || msg.toLowerCase().includes('auth')) {
-    friendlyMsg = 'API key rejected (401 Unauthorized)';
-    hint = 'Double-check your key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--rust)">console.anthropic.com</a>. Make sure you copied the full key starting with <code>sk-ant-</code>.';
-  } else if (msg.includes('429')) {
-    friendlyMsg = 'Rate limit reached (429 Too Many Requests)';
-    hint = 'You\'ve hit the API rate limit. Wait a minute and try again, or check your usage at the Anthropic console.';
-  } else if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
-    friendlyMsg = 'Network error  could not reach Anthropic API';
-    hint = 'Check your internet connection and try again.';
-  }
-
-  document.getElementById('results').innerHTML = `
-    <div class="error-box">
-      <div class="error-title"> Analysis Failed</div>
-      <div class="error-msg">
-        <strong>${friendlyMsg}</strong><br><br>
-        ${hint || msg}<br><br>
-        ${wasAI ? 'The tool will fall back to keyword mode if you remove your API key.' : ''}
-      </div>
-    </div>`;
-  document.getElementById('results').style.display = 'block';
+function renderError(msg) {
+  var el = document.getElementById('results');
+  el.innerHTML = '<div class="error-box"><div class="error-title">Analysis Failed</div><div class="error-msg">' + escHtml(msg || 'Unknown error. Please try again.') + '</div></div>';
+  el.style.display = 'block';
 }
 
-function animateNum(id, from, to, dur) {
-  const el = document.getElementById(id), start = Date.now();
-  (function tick() {
-    const p = Math.min(1, (Date.now()-start)/dur);
-    el.textContent = Math.round(from + (to-from) * (1-Math.pow(1-p,3))) + '%';
+function animateNum(id, from, to, duration) {
+  var el = document.getElementById(id);
+  var start = Date.now();
+  function tick() {
+    var p = Math.min(1, (Date.now() - start) / duration);
+    var eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (to - from) * eased) + '%';
     if (p < 1) requestAnimationFrame(tick);
-  })();
+  }
+  tick();
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 </script>
 </body>
